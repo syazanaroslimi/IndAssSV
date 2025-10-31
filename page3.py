@@ -3,20 +3,15 @@ import streamlit as st
 import plotly.express as px
 import numpy as np # Needed for the triangle mask functionality
 
-# Define the URL (assuming this is defined globally in your Streamlit app)
 url = 'https://raw.githubusercontent.com/syazanaroslimi/IndAssSV/refs/heads/main/crime_against_women_2013_2022.csv'
 
-# --- Data Loading Function (Crucial for correct Year axis) ---
+# --- Data Loading Function ---
 
-st.title('Crime Comparison: 2013 vs 2022 Analysis 📊')
+st.title('Objective 3: ')
 
 @st.cache_data
 def load_data(data_url):
-    """
-    Loads the dataset, setting the first column (containing the years) as the index.
-    """
     try:
-        # Corrected loading: index_col=0 sets the years as the DataFrame index
         data = pd.read_csv(data_url, index_col=0) 
         return data
     except Exception as e:
@@ -33,8 +28,6 @@ if not caw_dataset.empty:
 
         # 1. Prepare Data: Select individual crimes
         caw_data_numeric = caw_dataset.iloc[1:].copy()
-        
-        # 2. Assign meaningful column names and clean data
         caw_data_numeric.columns = caw_dataset.iloc[0]
         caw_data_numeric = caw_data_numeric.drop(
             columns=['Total Crimes against Women'], 
@@ -42,30 +35,32 @@ if not caw_dataset.empty:
         )
         caw_data_numeric = caw_data_numeric.astype(float)
 
-        # 3. Extract data for 2013 and 2022
-        # .loc['2013'] and .loc['2022'] rely on the corrected index_col=0 during load
+        # 2. Extract data for 2013 and 2022
         crimes_2013 = caw_data_numeric.loc['2013']
         crimes_2022 = caw_data_numeric.loc['2022']
 
-        # 4. Combine the data into a single DataFrame
+        # 3. Combine the data into a single DataFrame
         comparison_df = pd.DataFrame({'2013': crimes_2013, '2022': crimes_2022})
-
-        # 5. Reset index and melt the DataFrame for Plotly
-        comparison_df_melted = comparison_df.reset_index().melt(
-            id_vars='index', var_name='Year', value_name='Number of Crimes'
-        )
         
-        # 6. Rename the 'index' column to 'Type of Crime' for clarity
-        plot_data = comparison_df_melted.rename(columns={'index': 'Type of Crime'})
+        # 💡 FIX 1: Explicitly name the index to guarantee the column name after reset_index()
+        comparison_df.index.name = 'Type of Crime' 
 
-        # --- Plotly Grouped Bar Chart Creation (Replaces sns.barplot) ---
+        # 4. Reset index and melt the DataFrame for Plotly
+        # Now, reset_index() creates a column called 'Type of Crime', which we use for id_vars
+        plot_data = comparison_df.reset_index().melt(
+            id_vars='Type of Crime',                 # 💡 FIX 2: Use the correct column name
+            var_name='Year', 
+            value_name='Number of Crimes'
+        )
+
+        # --- Plotly Grouped Bar Chart Creation ---
 
         fig = px.bar(
             plot_data,
             x='Type of Crime',
             y='Number of Crimes',
-            color='Year',          # Group and color the bars by Year
-            barmode='group',       # Explicitly set the bars to be grouped side-by-side
+            color='Year',          
+            barmode='group',       
             title='Crime Comparison: 2013 vs 2022',
             labels={'Type of Crime': 'Crime Category', 'Number of Crimes': 'Total Number of Crimes'},
             height=650
@@ -78,7 +73,7 @@ if not caw_dataset.empty:
         st.plotly_chart(fig, use_container_width=True)
 
     except KeyError as e:
-        st.error(f"Error: Could not find year or column index {e}. Ensure the data is loaded correctly and years '2013' and '2022' exist as the index.")
+        st.error(f"Data Error: One or more expected labels ('2013', '2022', or 'Type of Crime') were not found. Error detail: {e}")
     except Exception as e:
         st.error(f"An unexpected error occurred during plotting: {e}")
         
