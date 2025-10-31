@@ -8,9 +8,11 @@ visualise1 = st.Page('page1.py', title='Objective 1')
 
 visualise2 = st.Page('page2.py', title='Objective 2')
 
+visualise3 = st.Page('page3.py', title='Objective 3')
+
 pg=st.navigation(
   {
-    "Menu":[visualise1, visualise2]
+    "Menu":[visualise1, visualise2, visualise3]
   }
 )
 
