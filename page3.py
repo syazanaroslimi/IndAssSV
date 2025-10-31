@@ -115,7 +115,7 @@ if not caw_dataset.empty:
             title='Trend of Rape Cases (2013-2022)',
             markers=True,
             # Add a color gradient based on the number of cases
-            color_continuous_scale=px.colors.sequential.Sunset,
+            #color_continuous_scale=px.colors.sequential.Sunset,
             height=500
         )
         
