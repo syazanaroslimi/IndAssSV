@@ -79,3 +79,60 @@ if not caw_dataset.empty:
         
 else:
     st.warning('The dataset is not loaded or is empty.')
+
+#_______________________________________________________________________________________________________________________________________
+# 2nd visualization
+# --- Data Preparation and Plotly Chart Creation ---
+
+if not caw_dataset.empty:
+    try:
+        st.subheader('Annual Trend for "Rape" Cases')
+
+        # 1. Prepare Data: Select individual crimes and clean
+        caw_data_numeric = caw_dataset.iloc[1:].copy()
+        caw_data_numeric.columns = caw_dataset.iloc[0]
+        caw_data_numeric = caw_data_numeric.drop(
+            columns=['Total Crimes against Women'], 
+            errors='ignore'
+        )
+        caw_data_numeric = caw_data_numeric.astype(float)
+
+        # 2. Select the data for 'Rape'
+        rape_trend = caw_data_numeric['Rape']
+
+        # 3. Create a clean DataFrame for Plotly
+        plot_data = pd.DataFrame({
+            'Year': rape_trend.index, # The index (Years) is correctly used as the X-axis
+            'Number of Cases': rape_trend.values
+        })
+
+        # --- Plotly Line Chart Creation (Replaces plt.plot) ---
+
+        fig = px.line(
+            plot_data,
+            x='Year',
+            y='Number of Cases',
+            title='Trend of Rape Cases (2013-2022)',
+            markers=True,
+            # Add a color gradient based on the number of cases
+            color_continuous_scale=px.colors.sequential.Sunset,
+            height=500
+        )
+        
+        # Customize the layout for better year display
+        fig.update_xaxes(dtick=1) # Ensure x-axis ticks show every year
+        fig.update_yaxes(rangemode="tozero") # Start y-axis from 0
+
+        # 4. Display the Plotly chart in Streamlit
+        st.plotly_chart(fig, use_container_width=True)
+
+    except KeyError:
+        st.error("Error: Could not find the column 'Rape'. Check the crime category names.")
+    except Exception as e:
+        st.error(f"An unexpected error occurred during plotting: {e}")
+        
+else:
+    st.warning('The dataset is not loaded or is empty.')
+
+#______________________________________________________________________________________________________________________________________
+# 3rd visualization
