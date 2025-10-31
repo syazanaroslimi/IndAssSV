@@ -113,7 +113,6 @@ if not caw_dataset.empty:
             y='Number of Cases',
             title='Trend of Rape Cases (2013-2022)',
             markers=True,
-            color_continuous_scale=px.colors.sequential.Sunset,
             height=500
         )
         
