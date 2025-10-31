@@ -6,9 +6,11 @@ st.set_page_config(
 
 visualise = st.Page('page1.py', title='Objective 1')
 
+visualise = st.Page('page2.py', title='Objective 2')
+
 pg=st.navigation(
   {
-    "Menu":[visualise]
+    "Menu":[visualise, visualise]
   }
 )
 
