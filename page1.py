@@ -15,7 +15,7 @@ url = 'https://raw.githubusercontent.com/syazanaroslimi/IndAssSV/refs/heads/main
 def load_data(data_url):
     """Loads the dataset from the specified URL."""
     try:
-        data = pd.read_csv(data_url)
+        data = pd.read_csv(data_url, index_col=0)
         return data
     except Exception as e:
         st.error(f"Error loading data: {e}")
