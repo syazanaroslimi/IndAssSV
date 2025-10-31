@@ -7,6 +7,19 @@ import numpy as np # Needed for the triangle mask functionality
 
 st.title('Objective 3: ')
 
+url = 'https://raw.githubusercontent.com/syazanaroslimi/IndAssSV/refs/heads/main/crime_against_women_2013_2022.csv'
+
+@st.cache_data
+def load_data(data_url):
+    try:
+        data = pd.read_csv(data_url, index_col=0) 
+        return data
+    except Exception as e:
+        st.error(f"Error loading data: {e}")
+        return pd.DataFrame()
+
+caw_dataset = load_data(url)
+
 # --- Data Preparation and Plotly Chart Creation ---
 # 1st visualization
 if not caw_dataset.empty:
