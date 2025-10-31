@@ -1,8 +1,7 @@
 import pandas as pd
 import streamlit as st
 import plotly.express as px
-import matplotlib.pyplot as plt # The pyplot module
-import seaborn as sns
+import numpy as np # Needed for the triangle mask functionality
 
 # --- Data Loading Function (Crucial for correct Year axis) ---
 
@@ -124,7 +123,7 @@ else:
 
 #_____________________________________________________________________________________________________________________________________
 # 3rd visualization
-# --- Data Preparation and Plotting ---
+# --- Data Preparation and Plotly Chart Creation ---
 
 if not caw_dataset.empty:
     try:
@@ -141,33 +140,29 @@ if not caw_dataset.empty:
 
         # 2. Calculate the correlation matrix
         correlation_matrix = caw_data_numeric.corr()
-
-        # 3. Create the Matplotlib figure object using plt.figure()
-        # This is a pyplot function that creates the Figure (the canvas)
-        plt.figure(figsize=(14, 12)) 
         
-        # 4. Plot the Seaborn Heatmap. When ax is not specified, 
-        # Seaborn plots to the *current* active figure/axes (pyplot's state).
-        sns.heatmap(
-            correlation_matrix, 
-            annot=True, 
-            cmap='coolwarm', 
-            fmt=".2f"
+        # 3. Plotly's imshow works best with numpy arrays or DataFrames directly
+        # We will use the DataFrame to retain column/index names
+        
+        # --- Plotly Heatmap Creation (px.imshow replaces sns.heatmap) ---
+
+        fig = px.imshow(
+            correlation_matrix,
+            text_auto=".2f", # Automatically display correlation values, formatted to 2 decimals
+            aspect="auto",
+            color_continuous_scale=px.colors.diverging.RdBu, # Use a divergent scale (Red/Blue for correlation)
+            zmin=-1, # Set the color scale minimum to -1 (perfect negative correlation)
+            zmax=1,  # Set the color scale maximum to 1 (perfect positive correlation)
+            labels=dict(x="Crime Category", y="Crime Category", color="Correlation"),
+            title='Correlation Heatmap of Crimes Against Women (2013-2022)'
         )
         
-        # 5. Set titles and rotation using pyplot commands (plt. commands)
-        plt.title('Correlation Heatmap of Crimes Against Women (2013-2022)')
-        plt.xticks(rotation=45, ha='right')
-        plt.yticks(rotation=0)
-        plt.tight_layout()
-
-        # 6. Retrieve the current active figure object and pass it to Streamlit
-        # plt.gcf() gets the *current* pyplot Figure object that Seaborn just drew on.
-        current_fig = plt.gcf() 
-        st.pyplot(current_fig)
+        # Customize text appearance and remove tick marks for cleaner look
+        fig.update_traces(hovertemplate="Crime A: %{y}<br>Crime B: %{x}<br>Correlation: %{z}<extra></extra>")
+        fig.update_xaxes(side="top", tickangle=45)
         
-        # Crucial step: Clear the current figure's state to prevent overlap with future plots
-        plt.close(current_fig) 
+        # 4. Display the Plotly chart in Streamlit
+        st.plotly_chart(fig, use_container_width=True)
 
     except Exception as e:
         st.error(f"An unexpected error occurred during plotting: {e}")
