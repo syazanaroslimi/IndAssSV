@@ -167,7 +167,7 @@ if not caw_dataset.empty:
                 heatmap_data_numeric,
                 x=heatmap_data_numeric.columns,  # Crime types on x-axis
                 y=heatmap_data_numeric.index,    # Years on y-axis
-                color_continuous_scale=px.colors.sequential.Viridis, # Or 'Hot', 'Viridis', etc.
+                color_continuous_scale=px.colors.sequential.Hot, # Or 'Hot', 'Viridis', etc.
                 title='Heatmap of Crimes against Women (2013-2022)',
                 aspect="auto", # Adjust aspect ratio
                 text_auto=True # Automatically add text labels to cells
