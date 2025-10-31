@@ -142,3 +142,49 @@ else:
 
 #______________________________________________________________________________________________________________________________________
 # 3rd visualization
+# --- Data Preparation and Plotly Chart Creation ---
+
+if not caw_dataset.empty:
+    try:
+        st.subheader('Inter-Category Correlation of Crime Rates')
+
+        # 1. Prepare Data: Select individual crimes
+        caw_data_numeric = caw_dataset.iloc[1:].copy()
+        caw_data_numeric.columns = caw_dataset.iloc[0]
+        caw_data_numeric = caw_data_numeric.drop(
+            columns=['Total Crimes against Women'], 
+            errors='ignore'
+        )
+        caw_data_numeric = caw_data_numeric.astype(float)
+
+        # 2. Calculate the correlation matrix
+        correlation_matrix = caw_data_numeric.corr()
+        
+        # 3. Plotly's imshow works best with numpy arrays or DataFrames directly
+        # We will use the DataFrame to retain column/index names
+        
+        # --- Plotly Heatmap Creation (px.imshow replaces sns.heatmap) ---
+
+        fig = px.imshow(
+            correlation_matrix,
+            text_auto=".2f", # Automatically display correlation values, formatted to 2 decimals
+            aspect="auto",
+            color_continuous_scale=px.colors.diverging.RdBu, # Use a divergent scale (Red/Blue for correlation)
+            zmin=-1, # Set the color scale minimum to -1 (perfect negative correlation)
+            zmax=1,  # Set the color scale maximum to 1 (perfect positive correlation)
+            labels=dict(x="Crime Category", y="Crime Category", color="Correlation"),
+            title='Correlation Heatmap of Crimes Against Women (2013-2022)'
+        )
+        
+        # Customize text appearance and remove tick marks for cleaner look
+        fig.update_traces(hovertemplate="Crime A: %{y}<br>Crime B: %{x}<br>Correlation: %{z}<extra></extra>")
+        fig.update_xaxes(side="top", tickangle=45)
+        
+        # 4. Display the Plotly chart in Streamlit
+        st.plotly_chart(fig, use_container_width=True)
+
+    except Exception as e:
+        st.error(f"An unexpected error occurred during plotting: {e}")
+        
+else:
+    st.warning('The dataset is not loaded or is empty.')
