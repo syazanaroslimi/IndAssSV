@@ -1,16 +1,16 @@
 import streamlit as st
 
 st.set_page_config(
-  page_title = "Crimes Against Women in India"
+  page_title = "Crimes Against Women in India", layout="wide"
 )
 
-visualise = st.Page('page1.py', title='Objective 1')
+visualise1 = st.Page('page1.py', title='Objective 1')
 
-visualise = st.Page('page2.py', title='Objective 2')
+visualise2 = st.Page('page2.py', title='Objective 2')
 
 pg=st.navigation(
   {
-    "Menu":[visualise, visualise]
+    "Menu":[visualise1, visualise2]
   }
 )
 
