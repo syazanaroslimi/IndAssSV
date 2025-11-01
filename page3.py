@@ -155,30 +155,33 @@ if not caw_dataset.empty:
             columns=['Total Crimes against Women'], 
             errors='ignore'
         )
-        caw_data_numeric = caw_data_numeric.astypeffloat)
+        caw_data_numeric = caw_data_numeric.astype(float)
 
         # 2. Calculate the correlation matrix
         correlation_matrix = caw_data_numeric.corr()
         
-        # 3. Plotly's imshow works best with numpy arrays or DataFrames directly
-        # We will use the DataFrame to retain column/index names
-        
         # --- Plotly Heatmap Creation (px.imshow replaces sns.heatmap) ---
-
+        
+        # 💡 FIX: Set an explicit, large height (e.g., 1000) to ensure vertical space 
+        # for all Y-axis labels.
         fig = px.imshow(
             correlation_matrix,
-            text_auto=".2f", # Automatically display correlation values, formatted to 2 decimals
+            text_auto=".2f",
             aspect="auto",
-            color_continuous_scale=px.colors.diverging.RdBu, # Use a divergent scale (Red/Blue for correlation)
-            zmin=-1, # Set the color scale minimum to -1 (perfect negative correlation)
-            zmax=1,  # Set the color scale maximum to 1 (perfect positive correlation)
+            color_continuous_scale=px.colors.diverging.RdBu,
+            zmin=-1,
+            zmax=1,
             labels=dict(x="Crime Category", y="Crime Category", color="Correlation"),
-            title='Correlation Heatmap of Crimes Against Women (2013-2022)'
+            title='Correlation Heatmap of Crimes Against Women (2013-2022)',
+            height=1000 # <--- Increased Height
         )
         
-        # Customize text appearance and remove tick marks for cleaner look
+        # Customize text appearance and ensure all tick labels are shown
         fig.update_traces(hovertemplate="Crime A: %{y}<br>Crime B: %{x}<br>Correlation: %{z}<extra></extra>")
         fig.update_xaxes(side="bottom", tickangle=45)
+        
+        # Ensure y-axis labels are not skipped
+        fig.update_yaxes(automargin=True) 
         
         # 4. Display the Plotly chart in Streamlit
         st.plotly_chart(fig, use_container_width=True)
