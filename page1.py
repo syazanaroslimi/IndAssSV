@@ -23,7 +23,7 @@ st.title('Objective 1: ')
 
 # --- 1. SUMMARY BOX PLACEMENT (Line 23) ---
 st.markdown("""
-<div style='background-color: #e3f2fd; padding: 15px; border-radius: 10px; border-left: 5px solid #2196F3;'>
+<div style='padding: 15px; border-radius: 10px; border-left: 5px solid #2196F3;'>
     <h4>Summary: Decade-Long Overview</h4>
     <p>This page provides a high-level view of crimes against women in India from 2013 to 2022. We begin by analyzing the trend in total reported crimes and then visualize the annual distribution across all individual crime categories to identify where the bulk of the volume lies.</p>
 </div>
@@ -149,7 +149,7 @@ if not caw_dataset.empty:
 if not caw_dataset.empty:
     st.markdown("---")
     st.markdown("""
-    <div style='background-color: #fff3e0; padding: 15px; border-radius: 10px; border-right: 5px solid #FF9800;'>
+    <div style='padding: 15px; border-radius: 10px; border-right: 5px solid #FF9800;'>
         <h4>Interpretation & Conclusion for Objective 1</h4>
         <p>The **Line and Bar Charts (1 & 2)** consistently show the overall volume of reported crimes over the decade. We observe a general upward trend, indicating that the total number of reported cases has increased from 2013 to 2022. This could be due to genuine growth in incidence or better reporting mechanisms and increased public awareness.</p>
         <p>The **Heatmap (3)** visually reinforces this by showing that most crime categories display higher numbers in the later years (darker shades at the bottom of the map). Crucially, the heatmap shows that categories like 'Cruelty by Husband or his Relatives' and 'Kidnapping & Abduction' contribute the largest volume to the annual totals, driving the overall upward trend observed in the first two visualizations.</p>
