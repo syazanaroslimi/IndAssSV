@@ -10,6 +10,7 @@ url = 'https://raw.githubusercontent.com/syazanaroslimi/IndAssSV/refs/heads/main
 def load_data(data_url):
     """Loads the dataset from the specified URL."""
     try:
+        # Load data with the first column (Year) as the index
         data = pd.read_csv(data_url, index_col=0)
         return data
     except Exception as e:
@@ -22,6 +23,14 @@ def prepare_data_for_metrics(caw_dataset):
     if caw_dataset.empty: return None, None
     
     caw_data_numeric = caw_dataset.iloc[1:].copy()
+    
+    # --- FIX 1: Explicitly convert the index to numeric (integer years) ---
+    try:
+        caw_data_numeric.index = pd.to_numeric(caw_data_numeric.index, errors='coerce').astype('Int64')
+    except Exception as e:
+        # Fallback if conversion fails, though it should work for years
+        st.warning(f"Could not convert index to numeric: {e}")
+        
     caw_data_numeric.columns = caw_dataset.iloc[0]
     
     # Find the 'Total Crimes against Women' series
@@ -41,10 +50,11 @@ caw_dataset = load_data(url)
 individual_crimes_df, total_crimes_series = (prepare_data_for_metrics(caw_dataset) 
                                             if not caw_dataset.empty else (None, None))
 
-st.title('Objective 1: ')
+st.title('Objective 1: Analysis of Overall Trends and Distribution')
 
-# --- 1. SUMMARY METRIC BOX PLACEMENT ---
-if total_crimes_series is not None:
+# --- 1. SUMMARY METRIC BOX PLACEMENT (Line 85) ---
+if total_crimes_series is not None and not total_crimes_series.empty:
+    
     # 1. Total Cases over the Decade
     total_decade_cases = total_crimes_series.sum()
     
@@ -53,8 +63,9 @@ if total_crimes_series is not None:
     peak_value = total_crimes_series.max()
 
     # 3. Overall Change (2022 vs 2013)
-    start_value = total_crimes_series.loc['2013']
-    end_value = total_crimes_series.loc['2022']
+    start_value = total_crimes_series.loc[2013] 
+    end_value = total_crimes_series.loc[2022]
+    
     absolute_change = end_value - start_value
     percent_change = (absolute_change / start_value) * 100
     
@@ -62,32 +73,30 @@ if total_crimes_series is not None:
     total_by_crime = individual_crimes_df.sum(axis=0)
     highest_crime = total_by_crime.idxmax()
     
-col1, col2, col3, col4 = st.columns(4)
+    # Streamlit Metric Columns (4 columns for 4 key metrics)
+    col1, col2, col3, col4 = st.columns(4)
     
-col1.metric(
-    label="Total Cases (2013-2022)", 
-    value=f"{total_decade_cases:,.0f}", 
-    help="Cumulative number of all reported crimes.",
-    delta="Decade Volume"
-)
-col2.metric(
-    label="Peak Year Reported", 
-    value=f"{peak_year}", 
-    help=f"Year with the highest number of reported total crimes: {peak_value:,.0f}",
-    delta="Highest Volume"
-)
-col3.metric(
-    label="Decade Change (2013 vs 2022)", 
-    value=f"{percent_change:+.2f}%", 
-    help=f"Total percent change in reported cases from 2013 to 2022. Absolute change: {absolute_change:+,0f} cases.",
-    delta_color="normal"
-)
-col4.metric(
-    label="Highest Volume Category", 
-    value=highest_crime, 
-    help=f"Crime category with the most reported cases over the entire decade: {highest_crime[:20]}...",
-    delta="Largest Category"
-)
+    col1.metric(
+        label="Total Cases (2013-2022)", 
+        value=f"{total_decade_cases:,.0f}", 
+        help="Cumulative number of all reported crimes over the 10-year period."
+    )
+    col2.metric(
+        label="Peak Reporting Year", 
+        value=f"{peak_year}", 
+        help=f"Year with the highest total number of reported crimes: {peak_value:,.0f} cases."
+    )
+    col3.metric(
+        label="Total Decade Change", 
+        value=f"{percent_change:+.2f}%", 
+        help=f"Percentage change in reported cases from 2013 to 2022. Absolute change: {absolute_change:+,0f} cases.",
+        delta_color="normal" # Uses green for positive, red for negative
+    )
+    col4.metric(
+        label="Primary Crime Category", 
+        value=highest_crime, 
+        help="The crime category with the highest total volume reported over the entire decade."
+    )
 
 st.markdown("---")
 # ----------------------------------------------
@@ -97,14 +106,16 @@ st.markdown("---")
 # 1st visualization: Total Crimes - Line Chart
 if 'caw_dataset' in locals() and not caw_dataset.empty:
     try:
-        st.subheader('1. Trend of Total Crimes against Women (2013-2022)')
+        st.subheader('1. Trend of Total Crimes against Women (2013-2022) - Line View')
 
         # --- Data Preparation ---
         column_name = caw_dataset.columns[caw_dataset.iloc[0] == 'Total Crimes against Women'][0]
-        total_crimes_series_vis = caw_dataset.iloc[1:][column_name].astype(int)
+        # Use the prepared series for visualization for consistency
+        total_crimes_series_vis = total_crimes_series.astype(int) 
 
         plot_data = pd.DataFrame({
-            'Year': pd.to_numeric(total_crimes_series_vis.index),
+            # The index is already numeric from the preparation function
+            'Year': total_crimes_series_vis.index,
             'Number of Crimes': total_crimes_series_vis.values
         })
         
@@ -113,7 +124,7 @@ if 'caw_dataset' in locals() and not caw_dataset.empty:
             plot_data,
             x='Year',
             y='Number of Crimes',
-            title='Trend of Total Crimes against Women From 2013 to 2022',
+            title='Trend of Total Crimes against Women From 2013 to 2022 (Line)',
             markers=True
         )
         
@@ -133,14 +144,13 @@ else:
 # 2nd visualization: Total Crimes - Bar Chart
 if not caw_dataset.empty:
     try:
-        st.subheader('2. Trend of Total Crimes against Women (2013-2022)')
+        st.subheader('2. Trend of Total Crimes against Women (2013-2022) - Bar View')
 
-        # --- Data Preparation (using data from previous block) ---
-        column_name = caw_dataset.columns[caw_dataset.iloc[0] == 'Total Crimes against Women'][0]
-        total_crimes_series_vis = caw_dataset.iloc[1:][column_name].astype(int)
+        # --- Data Preparation (using prepared data) ---
+        total_crimes_series_vis = total_crimes_series.astype(int)
 
         plot_data = pd.DataFrame({
-            'Year': pd.to_numeric(total_crimes_series_vis.index),
+            'Year': total_crimes_series_vis.index,
             'Number of Crimes': total_crimes_series_vis.values
         })
         
@@ -149,7 +159,7 @@ if not caw_dataset.empty:
             plot_data,
             x='Year',
             y='Number of Crimes',
-            title='Trend of Total Crimes against Women From 2013 to 2022',
+            title='Trend of Total Crimes against Women From 2013 to 2022 (Bar)',
             text='Number of Crimes',
             color='Number of Crimes',
             color_continuous_scale=px.colors.sequential.Teal
@@ -173,7 +183,8 @@ if not caw_dataset.empty:
         # --- Data Preparation ---
         heatmap_data_prep = caw_dataset.iloc[1:].copy()
         heatmap_data_prep.columns = caw_dataset.iloc[0]
-        heatmap_data_prep.index = pd.to_numeric(heatmap_data_prep.index)
+        # Ensure year index is numeric for plotting consistency
+        heatmap_data_prep.index = pd.to_numeric(heatmap_data_prep.index, errors='coerce').astype('Int64')
         heatmap_data_prep.index.name = 'Year'
 
         if 'Total Crimes against Women' in heatmap_data_prep.columns:
@@ -211,9 +222,10 @@ if not caw_dataset.empty:
 if not caw_dataset.empty:
     st.markdown("---")
     st.markdown("""
-    <div style='padding: 15px; border-radius: 10px; border-left: 5px solid #2196F3;'>
-    <h4>Summary: Decade-Long Overview</h4>
-    <p>This page provides a high-level view of crimes against women in India from 2013 to 2022. We begin by analyzing the trend in total reported crimes and then visualize the annual distribution across all individual crime categories to identify where the bulk of the volume lies.</p>
-</div>
+    <div style='padding: 15px; border-radius: 10px; border-right: 5px solid #FF9800;'>
+        <h4>Interpretation & Conclusion for Objective 1</h4>
+        <p>The **Line and Bar Charts (1 & 2)** consistently show the overall volume of reported crimes over the decade. We observe a general upward trend, indicating that the total number of reported cases has increased from 2013 to 2022. This could be due to genuine growth in incidence or better reporting mechanisms and increased public awareness.</p>
+        <p>The **Heatmap (3)** visually reinforces this by showing that most crime categories display higher numbers in the later years (darker shades at the bottom of the map). Crucially, the heatmap shows that categories like 'Cruelty by Husband or his Relatives' and 'Kidnapping & Abduction' contribute the largest volume to the annual totals, driving the overall upward trend observed in the first two visualizations.</p>
+    </div>
     """, unsafe_allow_html=True)
 # ----------------------------------------------------
