@@ -57,17 +57,14 @@ def prepare_page2_data(caw_dataset):
 
     # 5. Calculate Metrics
     
-    # M1: Most Frequent Crime (The name)
-    most_frequent_crime = top_5_crime_names[0]
-    
-    # M2: Total Top 5 Cases
+    # M1: Total Top 5 Cases
     total_top_5_cases = top_5_crimes_over_time.sum().sum()
 
-    # M3: Contribution of Top 5 (%)
+    # M2: Contribution of Top 5 (%)
     grand_total_all_crimes = total_crimes_series.sum()
     contribution_percent = (total_top_5_cases / grand_total_all_crimes) * 100
 
-    # M4: Fastest Growing Crime (Top 5 only)
+    # M3: Fastest Growing Crime (Top 5 only)
     # Calculate % change from 2013 to 2022 for each of the Top 5
     start_year_data = top_5_crimes_over_time.loc[2013]
     end_year_data = top_5_crimes_over_time.loc[2022]
@@ -83,9 +80,8 @@ caw_dataset = load_data(url)
 
 (
     top_5_crimes_df, plot_data_long, 
-    most_frequent_crime, total_top_5_cases, 
-    contribution_percent, fastest_growing_crime, 
-    fastest_growth_percent
+    total_top_5_cases, contribution_percent, 
+    fastest_growing_crime, fastest_growth_percent
 ) = prepare_page2_data(caw_dataset)
 
 
@@ -95,24 +91,19 @@ st.title('Objective 2: Crime Frequency and Breakdown by Category')
 # --- 2. SUMMARY METRIC BOXES ---
 if top_5_crimes_df is not None:
     
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
     
     col1.metric(
-        label="Most Frequent Crime", 
-        value=most_frequent_crime, 
-        help="The single crime category with the highest total reported volume (2013-2022)."
-    )
-    col2.metric(
         label="Total Cases (Top 5)", 
         value=f"{total_top_5_cases:,.0f}", 
         help="Cumulative cases reported across the top 5 categories."
     )
-    col3.metric(
+    col2.metric(
         label="Top 5 Contribution", 
         value=f"{contribution_percent:,.1f}%", 
         help="Percentage of the grand total of all crimes accounted for by the top 5 categories."
     )
-    col4.metric(
+    col3.metric(
         label="Fastest Growing Top 5 Crime", 
         value=fastest_growing_crime, 
         delta=f"{fastest_growth_percent:+.1f}%",
