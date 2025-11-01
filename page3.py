@@ -227,7 +227,7 @@ if not caw_data_numeric.empty:
             zmax=1,
             labels=dict(x="Crime Category", y="Crime Category", color="Correlation"),
             title='Correlation Heatmap of Crimes Against Women (2013-2022)',
-            height=1000 
+            height=700 
         )
         
         fig3.update_traces(hovertemplate="Crime A: %{y}<br>Crime B: %{x}<br>Correlation: %{z}<extra></extra>")
