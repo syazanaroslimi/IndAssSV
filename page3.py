@@ -155,7 +155,8 @@ if not caw_dataset.empty:
             columns=['Total Crimes against Women'], 
             errors='ignore'
         )
-        caw_data_numeric = caw_data_numeric.astype(float)
+        caw_data_numeric = caw_data_numeric.apply(pd.to_numeric, errors = 'coerce')
+        caw_data_numeric = caw_data_numeric.dropna(axis=1, how='all')
 
         # 2. Calculate the correlation matrix
         correlation_matrix = caw_data_numeric.corr()
