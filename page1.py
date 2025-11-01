@@ -65,20 +65,12 @@ if total_crimes_series is not None and not total_crimes_series.empty:
     peak_year = int(total_crimes_series.idxmax())
     peak_value = total_crimes_series.max()
 
-    # 3. Overall Change (2022 vs 2013)
-    # Use integer keys for .loc[] access since the index is now numeric
-    start_value = total_crimes_series.loc[2013] 
-    end_value = total_crimes_series.loc[2022]
-    
-    absolute_change = end_value - start_value
-    percent_change = (absolute_change / start_value) * 100
-    
-    # 4. Highest Volume Crime
+    # 3. Highest Volume Crime
     total_by_crime = individual_crimes_df.sum(axis=0)
     highest_crime = total_by_crime.idxmax()
     
-    # Streamlit Metric Columns (4 columns for 4 key metrics)
-    col1, col2, col3, col4 = st.columns(4)
+    # Streamlit Metric Columns (3 columns for 3 key metrics)
+    col1, col2, col3 = st.columns(3)
     
     col1.metric(
         label="Total Cases (2013-2022)", 
@@ -91,12 +83,6 @@ if total_crimes_series is not None and not total_crimes_series.empty:
         help=f"Year with the highest total number of reported crimes: {peak_value:,.0f} cases."
     )
     col3.metric(
-        label="Total Decade Change", 
-        value=f"{percent_change:+.2f}%", 
-        help=f"Percentage change in reported cases from 2013 to 2022. Absolute change: {absolute_change:+,0f} cases.",
-        delta_color="normal"
-    )
-    col4.metric(
         label="Primary Crime Category", 
         value=highest_crime, 
         help="The crime category with the highest total volume reported over the entire decade."
