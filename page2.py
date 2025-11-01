@@ -57,14 +57,17 @@ def prepare_page2_data(caw_dataset):
 
     # 5. Calculate Metrics
     
-    # M1: Total Top 5 Cases
+    # M1: Most Frequent Crime (The name) - Calculated but not used in metric boxes
+    most_frequent_crime = top_5_crime_names[0]
+    
+    # M2: Total Top 5 Cases
     total_top_5_cases = top_5_crimes_over_time.sum().sum()
 
-    # M2: Contribution of Top 5 (%)
+    # M3: Contribution of Top 5 (%)
     grand_total_all_crimes = total_crimes_series.sum()
     contribution_percent = (total_top_5_cases / grand_total_all_crimes) * 100
 
-    # M3: Fastest Growing Crime (Top 5 only)
+    # M4: Fastest Growing Crime (Top 5 only)
     # Calculate % change from 2013 to 2022 for each of the Top 5
     start_year_data = top_5_crimes_over_time.loc[2013]
     end_year_data = top_5_crimes_over_time.loc[2022]
@@ -80,8 +83,9 @@ caw_dataset = load_data(url)
 
 (
     top_5_crimes_df, plot_data_long, 
-    total_top_5_cases, contribution_percent, 
-    fastest_growing_crime, fastest_growth_percent
+    most_frequent_crime, total_top_5_cases, 
+    contribution_percent, fastest_growing_crime, 
+    fastest_growth_percent
 ) = prepare_page2_data(caw_dataset)
 
 
@@ -91,18 +95,24 @@ st.title('Objective 2: Crime Frequency and Breakdown by Category')
 # --- 2. SUMMARY METRIC BOXES ---
 if top_5_crimes_df is not None:
     
+    # Updated to 3 columns
     col1, col2, col3 = st.columns(3)
     
+    # Metric 1 (was col2): Total Cases (Top 5)
     col1.metric(
         label="Total Cases (Top 5)", 
         value=f"{total_top_5_cases:,.0f}", 
         help="Cumulative cases reported across the top 5 categories."
     )
+    
+    # Metric 2 (was col3): Top 5 Contribution
     col2.metric(
         label="Top 5 Contribution", 
         value=f"{contribution_percent:,.1f}%", 
         help="Percentage of the grand total of all crimes accounted for by the top 5 categories."
     )
+    
+    # Metric 3 (was col4): Fastest Growing Top 5 Crime
     col3.metric(
         label="Fastest Growing Top 5 Crime", 
         value=fastest_growing_crime, 
