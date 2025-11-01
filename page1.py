@@ -174,7 +174,7 @@ if not caw_dataset.empty:
             )
             
             # Optional: Further customize hover info or layout if needed
-            fig.update_xaxes(side="top") # Move crime type labels to the top for better readability
+            fig.update_xaxes(side="bottom", tickangle=45) # Move crime type labels to the bottom for better readability
             fig.update_layout(
                 height=700, # Adjust height for better display of many rows
                 margin=dict(l=50, r=50, t=80, b=50) # Adjust margins
