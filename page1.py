@@ -62,32 +62,32 @@ if total_crimes_series is not None:
     total_by_crime = individual_crimes_df.sum(axis=0)
     highest_crime = total_by_crime.idxmax()
     
-    col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4 = st.columns(4)
     
-    col1.metric(
-        label="Total Cases (2013-2022)", 
-        value=f"{total_decade_cases:,.0f}", 
-        help="Cumulative number of all reported crimes.",
-        delta="Decade Volume"
-    )
-    col2.metric(
-        label="Peak Year Reported", 
-        value=f"{peak_year}", 
-        help=f"Year with the highest number of reported total crimes: {peak_value:,.0f}",
-        delta="Highest Volume"
-    )
-    col3.metric(
-        label="Decade Change (2013 vs 2022)", 
-        value=f"{percent_change:+.2f}%", 
-        help=f"Total percent change in reported cases from 2013 to 2022. Absolute change: {absolute_change:+,0f} cases.",
-        delta_color="normal"
-    )
-    col4.metric(
-        label="Highest Volume Category", 
-        value=highest_crime, 
-        help=f"Crime category with the most reported cases over the entire decade: {highest_crime[:20]}...",
-        delta="Largest Category"
-    )
+col1.metric(
+    label="Total Cases (2013-2022)", 
+    value=f"{total_decade_cases:,.0f}", 
+    help="Cumulative number of all reported crimes.",
+    delta="Decade Volume"
+)
+col2.metric(
+    label="Peak Year Reported", 
+    value=f"{peak_year}", 
+    help=f"Year with the highest number of reported total crimes: {peak_value:,.0f}",
+    delta="Highest Volume"
+)
+col3.metric(
+    label="Decade Change (2013 vs 2022)", 
+    value=f"{percent_change:+.2f}%", 
+    help=f"Total percent change in reported cases from 2013 to 2022. Absolute change: {absolute_change:+,0f} cases.",
+    delta_color="normal"
+)
+col4.metric(
+    label="Highest Volume Category", 
+    value=highest_crime, 
+    help=f"Crime category with the most reported cases over the entire decade: {highest_crime[:20]}...",
+    delta="Largest Category"
+)
 
 st.markdown("---")
 # ----------------------------------------------
