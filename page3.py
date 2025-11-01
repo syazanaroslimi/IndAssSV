@@ -222,7 +222,7 @@ if not caw_data_numeric.empty:
             correlation_matrix,
             text_auto=".2f",
             aspect="auto",
-            color_continuous_scale=px.colors.diverging.BuRd,
+            color_continuous_scale=px.colors.diverging.RdBu,
             zmin=-1,
             zmax=1,
             labels=dict(x="Crime Category", y="Crime Category", color="Correlation"),
