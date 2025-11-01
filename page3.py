@@ -178,7 +178,7 @@ if not caw_dataset.empty:
         
         # Customize text appearance and remove tick marks for cleaner look
         fig.update_traces(hovertemplate="Crime A: %{y}<br>Crime B: %{x}<br>Correlation: %{z}<extra></extra>")
-        fig.update_xaxes(side="top", tickangle=45)
+        fig.update_xaxes(side="bottom", tickangle=45)
         
         # 4. Display the Plotly chart in Streamlit
         st.plotly_chart(fig, use_container_width=True)
