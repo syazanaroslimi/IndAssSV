@@ -24,22 +24,25 @@ def prepare_data_for_metrics(caw_dataset):
     
     caw_data_numeric = caw_dataset.iloc[1:].copy()
     
-    # --- FIX 1: Explicitly convert the index to numeric (integer years) ---
+    # Set human-readable column names from the original first row
+    caw_data_numeric.columns = caw_dataset.iloc[0]
+    
+    # Convert index (Year) to numeric (integer) for consistent access
     try:
         caw_data_numeric.index = pd.to_numeric(caw_data_numeric.index, errors='coerce').astype('Int64')
     except Exception as e:
-        # Fallback if conversion fails, though it should work for years
         st.warning(f"Could not convert index to numeric: {e}")
         
-    caw_data_numeric.columns = caw_dataset.iloc[0]
     
-    # Find the 'Total Crimes against Women' series
-    total_col_name = caw_dataset.columns[caw_dataset.iloc[0] == 'Total Crimes against Women'][0]
-    total_crimes_series = caw_data_numeric[total_col_name].astype(float)
+    # --- FIX APPLIED HERE: Access column directly by the new, correct name ---
+    TOTAL_CRIMES_KEY = 'Total Crimes against Women'
+    
+    # Access the series using the correct string key
+    total_crimes_series = caw_data_numeric[TOTAL_CRIMES_KEY].astype(float)
     
     # Drop total column to get only individual crimes
     individual_crimes_df = caw_data_numeric.drop(
-        columns=[total_col_name], 
+        columns=[TOTAL_CRIMES_KEY], 
         errors='ignore'
     ).astype(float)
     
@@ -52,7 +55,7 @@ individual_crimes_df, total_crimes_series = (prepare_data_for_metrics(caw_datase
 
 st.title('Objective 1: Analysis of Overall Trends and Distribution')
 
-# --- 1. SUMMARY METRIC BOX PLACEMENT (Line 85) ---
+# --- 1. SUMMARY METRIC BOX PLACEMENT ---
 if total_crimes_series is not None and not total_crimes_series.empty:
     
     # 1. Total Cases over the Decade
@@ -63,6 +66,7 @@ if total_crimes_series is not None and not total_crimes_series.empty:
     peak_value = total_crimes_series.max()
 
     # 3. Overall Change (2022 vs 2013)
+    # Use integer keys for .loc[] access since the index is now numeric
     start_value = total_crimes_series.loc[2013] 
     end_value = total_crimes_series.loc[2022]
     
@@ -90,7 +94,7 @@ if total_crimes_series is not None and not total_crimes_series.empty:
         label="Total Decade Change", 
         value=f"{percent_change:+.2f}%", 
         help=f"Percentage change in reported cases from 2013 to 2022. Absolute change: {absolute_change:+,0f} cases.",
-        delta_color="normal" # Uses green for positive, red for negative
+        delta_color="normal"
     )
     col4.metric(
         label="Primary Crime Category", 
@@ -108,13 +112,10 @@ if 'caw_dataset' in locals() and not caw_dataset.empty:
     try:
         st.subheader('1. Trend of Total Crimes against Women (2013-2022) - Line View')
 
-        # --- Data Preparation ---
-        column_name = caw_dataset.columns[caw_dataset.iloc[0] == 'Total Crimes against Women'][0]
         # Use the prepared series for visualization for consistency
         total_crimes_series_vis = total_crimes_series.astype(int) 
 
         plot_data = pd.DataFrame({
-            # The index is already numeric from the preparation function
             'Year': total_crimes_series_vis.index,
             'Number of Crimes': total_crimes_series_vis.values
         })
@@ -133,8 +134,6 @@ if 'caw_dataset' in locals() and not caw_dataset.empty:
 
         st.plotly_chart(fig, use_container_width=True)
 
-    except IndexError:
-        st.error("Error: Could not find the column 'Total Crimes against Women'. Check the dataset's structure.")
     except Exception as e:
         st.error(f"An unexpected error occurred during plotting (Vizu 1): {e}")
 else:
