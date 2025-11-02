@@ -17,7 +17,7 @@ def load_data(data_url):
         st.error(f"Error loading data: {e}")
         return pd.DataFrame()
 
-# Helper function to prepare data for metrics and visualizations
+# Helper function to prepare data for metrics and visualization
 @st.cache_data
 def prepare_data_for_metrics(caw_dataset):
     if caw_dataset.empty: return None, None
@@ -33,12 +33,8 @@ def prepare_data_for_metrics(caw_dataset):
     except Exception as e:
         st.warning(f"Could not convert index to numeric: {e}")
         
-    
-    # --- FIX APPLIED HERE: Access column directly by the new, correct name ---
-    TOTAL_CRIMES_KEY = 'Total Crimes against Women'
-    
-    # Access the series using the correct string key
-    total_crimes_series = caw_data_numeric[TOTAL_CRIMES_KEY].astype(float)
+    TOTAL_CRIMES_KEY = 'Total Crimes against Women'   # access column directly
+    total_crimes_series = caw_data_numeric[TOTAL_CRIMES_KEY].astype(float)       # access the series using string key
     
     # Drop total column to get only individual crimes
     individual_crimes_df = caw_data_numeric.drop(
@@ -53,9 +49,9 @@ caw_dataset = load_data(url)
 individual_crimes_df, total_crimes_series = (prepare_data_for_metrics(caw_dataset) 
                                             if not caw_dataset.empty else (None, None))
 
-st.title('Objective 1: Analysis of Overall Trends and Distribution')
+st.title('Objective 1: To analyse the annual trends and patterns of crimes against women in India from 2013 to 2022')
 
-# --- 1. SUMMARY METRIC BOX PLACEMENT ---
+# summary box
 if total_crimes_series is not None and not total_crimes_series.empty:
     
     # 1. Total Cases over the Decade
@@ -69,7 +65,7 @@ if total_crimes_series is not None and not total_crimes_series.empty:
     total_by_crime = individual_crimes_df.sum(axis=0)
     highest_crime = total_by_crime.idxmax()
     
-    # Streamlit Metric Columns (3 columns for 3 key metrics)
+    # metrics column (3 columns for 3 key metrics)
     col1, col2, col3 = st.columns(3)
     
     col1.metric(
@@ -85,19 +81,17 @@ if total_crimes_series is not None and not total_crimes_series.empty:
     col3.metric(
         label="Primary Crime Category", 
         value=highest_crime, 
-        help="The crime category with the highest total volume reported over the entire decade."
+        help="The crime with the highest total volume reported over the entire decade."
     )
 
 st.markdown("---")
 # ----------------------------------------------
 
-
 # _____________________________________________________________________________________________________________________________
-# 1st visualization: Total Crimes - Line Chart
+# 1st visualisation - line chart
 if 'caw_dataset' in locals() and not caw_dataset.empty:
     try:
-        st.subheader('1. Trend of Total Crimes against Women (2013-2022) - Line View')
-
+        #st.subheader('1. Trend of Total Crimes against Women (2013-2022) - Line View')
         # Use the prepared series for visualization for consistency
         total_crimes_series_vis = total_crimes_series.astype(int) 
 
@@ -106,12 +100,12 @@ if 'caw_dataset' in locals() and not caw_dataset.empty:
             'Number of Crimes': total_crimes_series_vis.values
         })
         
-        # --- Plotly Chart Creation ---
+        # Plotly Chart Creation
         fig = px.line(
             plot_data,
             x='Year',
             y='Number of Crimes',
-            title='Trend of Total Crimes against Women From 2013 to 2022 (Line)',
+            title='1. Trend of Total Crimes against Women From 2013 to 2022',
             markers=True
         )
         
@@ -124,14 +118,11 @@ if 'caw_dataset' in locals() and not caw_dataset.empty:
         st.error(f"An unexpected error occurred during plotting (Vizu 1): {e}")
 else:
     st.warning('The `caw_dataset` is not loaded or is empty. Please ensure the data loading step runs successfully.')
-
 # _______________________________________________________________________________________________________________________________________
-# 2nd visualization: Total Crimes - Bar Chart
+# 2nd visualisation - bar chart
 if not caw_dataset.empty:
     try:
-        st.subheader('2. Trend of Total Crimes against Women (2013-2022) - Bar View')
-
-        # --- Data Preparation (using prepared data) ---
+        #st.subheader('2. Trend of Total Crimes against Women (2013-2022) - Bar View')
         total_crimes_series_vis = total_crimes_series.astype(int)
 
         plot_data = pd.DataFrame({
@@ -139,12 +130,12 @@ if not caw_dataset.empty:
             'Number of Crimes': total_crimes_series_vis.values
         })
         
-        # --- Plotly Bar Chart Creation ---
+        # Chart Creation
         fig = px.bar(
             plot_data,
             x='Year',
             y='Number of Crimes',
-            title='Trend of Total Crimes against Women From 2013 to 2022 (Bar)',
+            title='2. Total Crimes against Women From 2013 to 2022',
             text='Number of Crimes',
             color='Number of Crimes',
             color_continuous_scale=px.colors.sequential.Teal
@@ -160,12 +151,11 @@ if not caw_dataset.empty:
         st.error(f"An unexpected error occurred during plotting (Vizu 2): {e}")
 
 # _____________________________________________________________________________________________________________________________________
-# 3rd visualization: Heatmap of all Crimes vs. Year
+# 3rd visualisation: heatmap of all crimes vs. year
 if not caw_dataset.empty:
     try:
-        st.subheader('3. Annual Distribution of All Crime Categories')
-
-        # --- Data Preparation ---
+        #st.subheader('3. Annual Distribution of All Crime Categories')
+        # data preparation
         heatmap_data_prep = caw_dataset.iloc[1:].copy()
         heatmap_data_prep.columns = caw_dataset.iloc[0]
         # Ensure year index is numeric for plotting consistency
@@ -178,19 +168,19 @@ if not caw_dataset.empty:
         heatmap_data_numeric = heatmap_data_prep.astype(float)
         heatmap_data_numeric = heatmap_data_numeric.dropna(axis=1, how='all')
         
-        # --- Plotly Heatmap Creation ---
+        # Heatmap Creation 
         if not heatmap_data_numeric.empty:
             fig = px.imshow(
                 heatmap_data_numeric,
                 x=heatmap_data_numeric.columns,
                 y=heatmap_data_numeric.index,
                 color_continuous_scale=px.colors.sequential.Teal,
-                title='Magnitude of Crimes by Category and Year',
+                title='3. Heatmap of Crimes by Category and Year',
                 aspect="auto",
                 text_auto=True
             )
             
-            fig.update_xaxes(side="bottom", tickangle=90)
+            fig.update_xaxes(side="bottom", tickangle=45)
             fig.update_layout(
                 height=700,
                 margin=dict(l=50, r=50, t=80, b=50)
@@ -203,14 +193,13 @@ if not caw_dataset.empty:
     except Exception as e:
         st.error(f"An error occurred during heatmap generation (Vizu 3): {e}")
 
-# --- 2. INTERPRETATION BOX PLACEMENT ---
+# interpretation box
 if not caw_dataset.empty:
     st.markdown("---")
     st.markdown("""
-    <div style='padding: 15px; border-radius: 10px; border-right: 5px solid #FF9800;'>
-        <h4>Interpretation & Conclusion for Objective 1</h4>
-        <p>The **Line and Bar Charts (1 & 2)** consistently show the overall volume of reported crimes over the decade. We observe a general upward trend, indicating that the total number of reported cases has increased from 2013 to 2022. This could be due to genuine growth in incidence or better reporting mechanisms and increased public awareness.</p>
-        <p>The **Heatmap (3)** visually reinforces this by showing that most crime categories display higher numbers in the later years (darker shades at the bottom of the map). Crucially, the heatmap shows that categories like 'Cruelty by Husband or his Relatives' and 'Kidnapping & Abduction' contribute the largest volume to the annual totals, driving the overall upward trend observed in the first two visualizations.</p>
-    </div>
+    <div style='padding: 15px; border-radius: 10px; border-left: 5px solid #2196F3;'>
+    <p>All graph show the overall trend of crimes against women in India increasing gradually from 2013 to 2022 with a slight decrease in 2020. 
+    This pattern shows woman's safety in India is still at a low level.</p>
+</div>
     """, unsafe_allow_html=True)
 # ----------------------------------------------------
