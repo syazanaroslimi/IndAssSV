@@ -85,7 +85,6 @@ if total_crimes_series is not None and not total_crimes_series.empty:
     )
 
 st.markdown("---")
-# ----------------------------------------------
 
 # _____________________________________________________________________________________________________________________________
 # 1st visualisation - line chart
@@ -118,6 +117,7 @@ if 'caw_dataset' in locals() and not caw_dataset.empty:
         st.error(f"An unexpected error occurred during plotting (Vizu 1): {e}")
 else:
     st.warning('The `caw_dataset` is not loaded or is empty. Please ensure the data loading step runs successfully.')
+
 # _______________________________________________________________________________________________________________________________________
 # 2nd visualisation - bar chart
 if not caw_dataset.empty:
@@ -200,7 +200,7 @@ if not caw_dataset.empty:
     <div style='padding: 15px; border-radius: 10px; border-left: 5px solid #2196F3;'>
     <h4>Interpretation</h4>
     <p>All graph show the overall trend of crimes against women in India increasing gradually from 2013 to 2022 with a slight decrease in 2020. 
-    This pattern shows woman's safety in India is still at a low level.</p>
+    This pattern shows women's safety in India is still at a low level.</p>
 </div>
     """, unsafe_allow_html=True)
 # ----------------------------------------------------
