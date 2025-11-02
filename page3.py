@@ -6,8 +6,7 @@ import numpy as np
 # Define the URL for the dataset
 url = 'https://raw.githubusercontent.com/syazanaroslimi/IndAssSV/refs/heads/main/crime_against_women_2013_2022.csv'
 
-# --- Data Utility Functions (Cached for efficiency) ---
-
+# data preparation
 @st.cache_data
 def load_data(data_url):
     """Loads the dataset and sets the years as the index."""
@@ -25,7 +24,6 @@ def prepare_data(caw_dataset):
     caw_data_numeric = caw_dataset.iloc[1:].copy()
     caw_data_numeric.columns = caw_dataset.iloc[0]
     
-    # CRITICAL FIX: Convert index (Year) to numeric to avoid KeyError when using .loc[2013]
     try:
         # Use .astype('Int64') for numeric indexing
         caw_data_numeric.index = pd.to_numeric(caw_data_numeric.index, errors='coerce').astype('Int64')
@@ -43,17 +41,16 @@ def prepare_data(caw_dataset):
 def prepare_page3_metrics(data_df):
     """Calculates key metrics for the summary boxes based on 2013 vs 2022 changes and correlations."""
     
-    # 1. Largest Absolute Change (2013 vs 2022)
+    # Largest Absolute Change (2013 vs 2022)
     change = data_df.loc[2022] - data_df.loc[2013]
     largest_abs_change_crime = change.abs().idxmax()
     actual_change = change[largest_abs_change_crime]
 
-    # 2. Correlation Metrics
+    # Correlation Metrics
     corr_matrix = data_df.corr()
     corr_pairs = corr_matrix.unstack()
     
-    # Filter for unique pairs and exclude self-correlation (A=B)
-    unique_pairs = corr_pairs[corr_pairs < 1].drop_duplicates().dropna()
+    unique_pairs = corr_pairs[corr_pairs < 1].drop_duplicates().dropna()    # Filter for unique pairs and exclude self-correlation (A=B)
 
     # Strongest Positive Correlation
     strongest_pos_corr_val = unique_pairs.max()
@@ -63,7 +60,7 @@ def prepare_page3_metrics(data_df):
     strongest_neg_corr_val = unique_pairs.min()
     (crime_a_neg, crime_b_neg) = unique_pairs[unique_pairs == strongest_neg_corr_val].index[0]
     
-    # 3. Compound Annual Growth Rate (CAGR) for Rape Cases (2013 to 2022, 9 years)
+    # Compound Annual Growth Rate (CAGR) for Rape Cases
     rape_start = data_df.loc[2013, 'Rape']
     rape_end = data_df.loc[2022, 'Rape']
     # Calculate CAGR using the formula: ((Ending Value / Starting Value) ^ (1 / Years)) - 1
@@ -76,15 +73,13 @@ def prepare_page3_metrics(data_df):
         'strongest_pos_corr_crimes': f"{crime_a_pos} & {crime_b_pos}",
         'strongest_neg_corr_val': strongest_neg_corr_val,
         'strongest_neg_corr_crimes': f"{crime_a_neg} & {crime_b_neg}",
-        'cagr_rape': cagr_rape # NEW METRIC ADDED
+        'cagr_rape': cagr_rape
     }
-
-# --- Main App Execution ---
 
 caw_dataset = load_data(url)
 caw_data_numeric = prepare_data(caw_dataset)
 
-st.title('Objective 3: Correlative Analysis of Crime Categories')
+st.title('Objective 3: To assess the comparison of crime rates between 2013 and 2022, the trends of rape cases in 10 years and the relationship between each type of crime against women')
 
 # Calculate Metrics for Summary Boxes
 metrics = None
@@ -94,9 +89,8 @@ if not caw_data_numeric.empty:
     except Exception as e:
         st.error(f"Error calculating metrics for summary: {e}")
 
-# --- 1. SUMMARY METRIC BOXES (Top of Page) ---
+# summary box
 if metrics:
-    
     col1, col2, col3, col4 = st.columns(4)
     
     # M1: Largest Absolute Change
@@ -108,42 +102,36 @@ if metrics:
         delta_color="inverse", 
         help="The crime category that saw the largest absolute case number difference between 2013 and 2022."
     )
-    
     # M2: Strongest Positive Correlation
     col2.metric(
         label="Strongest Positive Correlation", 
         value=f"{metrics['strongest_pos_corr_val']:.2f}",
-        help=f"Highest correlation pair: {metrics['strongest_pos_corr_crimes']}. Indicates strong co-movement over time."
+        help=f"Highest correlation pair: {metrics['strongest_pos_corr_crimes']}." #Indicates strong co-movement over time."
     )
-    
     # M3: Strongest Negative Correlation
     col3.metric(
         label="Strongest Negative Correlation", 
         value=f"{metrics['strongest_neg_corr_val']:.2f}",
-        help=f"Lowest correlation pair: {metrics['strongest_neg_corr_crimes']}. Suggests one crime decreases when the other increases."
+        help=f"Lowest correlation pair: {metrics['strongest_neg_corr_crimes']}." #Suggests one crime decreases when the other increases."
     )
-    
-    # M4: Annual Growth Rate (Rape) - REPLACED METRIC
+    # M4: Annual Growth Rate (Rape) 
     cagr_value = f"{metrics['cagr_rape'] * 100:.2f}%" if not np.isnan(metrics['cagr_rape']) else "N/A"
     col4.metric(
         label="Annual Growth Rate (Rape)", 
         value=cagr_value,
         # Delta shows whether it's growing (green/positive) or shrinking (red/negative)
         delta=f"Total Change: {metrics['actual_change']:+,.0f}",
-        delta_color="inverse" if metrics['cagr_rape'] > 0 else "normal", 
+        delta_color="inverse", #if metrics['cagr_rape'] > 0 else "normal", 
         help="Compound Annual Growth Rate of 'Rape' cases from 2013 to 2022."
     )
 
 st.markdown("---")
 # ----------------------------------------------------
-
-
+# Visualisation
 if not caw_data_numeric.empty:
-    
-    # --- VIZ 1: Comparison Bar Chart (2013 vs 2022) ---
+    # 1st visualisation
     try:
-        st.subheader('1. Crime Count Comparison by Type: 2013 vs 2022')
-
+        #st.subheader('1. Crime Count Comparison by Type: 2013 vs 2022')
         # Use numeric index for .loc, then convert back to string for plotting if needed
         crimes_2013 = caw_data_numeric.loc[2013]
         crimes_2022 = caw_data_numeric.loc[2022]
@@ -163,7 +151,7 @@ if not caw_data_numeric.empty:
             y='Number of Crimes',
             color='Year',
             barmode='group',
-            title='Crime Comparison: 2013 vs 2022',
+            title='1. Crime Comparison: 2013 vs 2022',
             labels={'Type of Crime': 'Crime Category', 'Number of Crimes': 'Total Number of Crimes'},
             height=650
         )
@@ -175,11 +163,9 @@ if not caw_data_numeric.empty:
     except Exception as e:
         st.error(f"An unexpected error occurred during VIZ 1 plotting: {e}")
 
-
-    # --- VIZ 2: Rape Trend (Zoomed View) ---
+    # 2nd visualisation
     try:
-        st.subheader('2. Annual Trend for "Rape" Cases (Zoomed View)')
-        
+        #st.subheader('2. Annual Trend for "Rape" Cases (Zoomed View)')
         rape_trend = caw_data_numeric['Rape']
 
         plot_data_rape = pd.DataFrame({
@@ -192,7 +178,7 @@ if not caw_data_numeric.empty:
             plot_data_rape,
             x='Year',
             y='Number of Cases',
-            title='Trend of Rape Cases (2013-2022)',
+            title='2. Trend of Rape Cases from 2013 to 2022',
             markers=True,
             height=500
         )
@@ -212,10 +198,9 @@ if not caw_data_numeric.empty:
     except Exception as e:
         st.error(f"An unexpected error occurred during VIZ 2 plotting: {e}")
 
-    # --- VIZ 3: Correlation Heatmap ---
+    # 3rd visualisation
     try:
-        st.subheader('3. Inter-Category Correlation of Crime Rates')
-
+        #st.subheader('3. Inter-Category Correlation of Crime Rates')
         correlation_matrix = caw_data_numeric.corr()
         
         fig3 = px.imshow(
@@ -226,7 +211,7 @@ if not caw_data_numeric.empty:
             zmin=-1,
             zmax=1,
             labels=dict(x="Crime Category", y="Crime Category", color="Correlation"),
-            title='Correlation Heatmap of Crimes Against Women (2013-2022)',
+            title='3. Relationship of Each Crimes Against Women from 2013 to 2022)',
             height=700 
         )
         
@@ -239,16 +224,15 @@ if not caw_data_numeric.empty:
     except Exception as e:
         st.error(f"An unexpected error occurred during VIZ 3 plotting: {e}")
 
-
     st.markdown("---")
 
-    # --- 5. INTERPRETATION CONCLUSION ---
+    # interpretation
     st.markdown("""
-    <div style='padding: 15px; border-radius: 10px; border-right: 5px solid #FF9800;'>
-        <h4>Interpretation & Conclusion for Objective 3</h4>
-        <p>The correlation heatmap reveals a widespread **strong positive relationship** among most crime categories. This suggests that the societal factors or reporting trends that drive one type of crime against women often influence others concurrently.</p>
-        <p>Specifically, the **Strongest Positive Correlation** highlights two crime types that trend almost identically over time. Conversely, the **Largest Change metric** identifies the crime category that had the greatest absolute shift in volume between the start and end of the decade, indicating a potential targeted policy effect or a rapid social change influencing that specific crime. The **Annual Growth Rate** for Rape cases provides specific insight into the year-over-year change of this critical crime category over the decade, complementing the zoomed trend visualization.</p>
-    </div>
+    <div style='padding: 15px; border-radius: 10px; border-left: 5px solid #2196F3;'>
+    <h4>Interpretation</h4>
+    <p>The graph show a significant increase in the number of cases in 2022 compared to 2013, with rape cases showing a fluctuating pattern over the period.
+    Correlations between crimes shows that one type of crimes against women can influence other crimes as well.</p>
+</div>
     """, unsafe_allow_html=True)
 
 else:
