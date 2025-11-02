@@ -53,10 +53,9 @@ def prepare_page2_data(caw_dataset):
 
     # Calculate Metrics
     # M1: Most Frequent Crime (The name) 
-    # most_frequent_crime = top_5_crime_names[0]
+    most_frequent_crime = top_5_crime_names[0]  # not use in summary box
     
-    # M2: Total Top 5 Cases
-    total_top_5_cases = top_5_crimes_over_time.sum().sum()
+    total_top_5_cases = top_5_crimes_over_time.sum().sum()     # M2: Total Top 5 Cases
 
     # M3: Contribution of Top 5 (%)
     grand_total_all_crimes = total_crimes_series.sum()
@@ -78,36 +77,28 @@ caw_dataset = load_data(url)
 
 (
     top_5_crimes_df, plot_data_long, 
-    total_top_5_cases, 
+    most_frequent_crime, total_top_5_cases, 
     contribution_percent, fastest_growing_crime, 
     fastest_growth_percent
 ) = prepare_page2_data(caw_dataset)
 
+st.title('Objective 2: To identify the top 5 crime categories and access the changing patterns of major crime rates from 2013 to 2022')
 
-st.title('Objective 2: Crime Frequency and Breakdown by Category')
-
-
-# --- 2. SUMMARY METRIC BOXES ---
+# summary box
 if top_5_crimes_df is not None:
     
-    # Updated to 3 columns
     col1, col2, col3 = st.columns(3)
     
-    # Metric 1 (was col2): Total Cases (Top 5)
     col1.metric(
         label="Total Cases (Top 5)", 
         value=f"{total_top_5_cases:,.0f}", 
-        help="Cumulative cases reported across the top 5 categories."
+        help="Cumulative cases reported across the top 5 categories for 10-decade."
     )
-    
-    # Metric 2 (was col3): Top 5 Contribution
     col2.metric(
         label="Top 5 Contribution", 
         value=f"{contribution_percent:,.1f}%", 
         help="Percentage of the grand total of all crimes accounted for by the top 5 categories."
     )
-    
-    # Metric 3 (was col4): Fastest Growing Top 5 Crime
     col3.metric(
         label="Fastest Growing Top 5 Crime", 
         value=fastest_growing_crime, 
