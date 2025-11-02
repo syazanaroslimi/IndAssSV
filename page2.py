@@ -82,7 +82,7 @@ caw_dataset = load_data(url)
     fastest_growth_percent
 ) = prepare_page2_data(caw_dataset)
 
-st.title('Objective 2: To identify the top 5 crime categories and access the changing patterns of major crime rates from 2013 to 2022')
+st.title('Objective 2: To identify the top 5 crime categories and access the changing patterns of major crime rates in India from 2013 to 2022')
 
 # summary box
 if top_5_crimes_df is not None:
@@ -104,20 +104,17 @@ if top_5_crimes_df is not None:
         value=fastest_growing_crime, 
         delta=f"{fastest_growth_percent:+.1f}%",
         delta_color="inverse", # Red for growth in crime
-        help="The Top 5 crime type that saw the largest percentage increase from 2013 to 2022."
+        help="The Top 5 crime type that have the largest percentage increase from 2013 to 2022."
     )
 
 st.markdown("---")
 # ----------------------------------------------
-
-# --- 3. Visualizations ---
-
+# Visualisation
 if not caw_dataset.empty and top_5_crimes_df is not None:
     try:
-        # --- VIZ 1: Top 5 Crime Totals (Horizontal Bar Chart) ---
-        st.subheader('1. Total Count of Top 5 Crime Categories')
-        
-        # Calculate totals for Vizu 1
+        # 1st Visualisation
+        #st.subheader('1. Total Count of Top 5 Crime Categories')
+        # Calculate totals for 1st graph
         crime_totals = top_5_crimes_df.sum().sort_values(ascending=True)
         plot_data_v1 = pd.DataFrame({
             'Type of Crime': crime_totals.index,
@@ -129,7 +126,7 @@ if not caw_dataset.empty and top_5_crimes_df is not None:
             x='Total Crimes', 
             y='Type of Crime',
             orientation='h',
-            title='Top 5 Most Frequent Crimes Against Women (Total 2013-2022)',
+            title='1. Top 5 Most Frequent Crimes Against Women from 2013 to 2022',
             labels={'Total Crimes': 'Total Number of Crimes', 'Type of Crime': 'Crime Category'},
             text='Total Crimes',
             color='Total Crimes',
@@ -139,16 +136,14 @@ if not caw_dataset.empty and top_5_crimes_df is not None:
         fig1.update_traces(texttemplate='%{text:,.0f}', textposition='outside')
         st.plotly_chart(fig1, use_container_width=True)
 
-        
-        # --- VIZ 2: Trend of Top 5 (Multi-Line Chart) ---
-        st.subheader(f"2. Trend of Top 5 Most Frequent Crimes Over Time")
-
+        # 2nd visualisation
+        #st.subheader(f"2. Trend of Top 5 Most Frequent Crimes Over Time")
         fig2 = px.line(
             plot_data_long,
             x='Year',
             y='Number of Crimes',
             color='Type of Crime',
-            title='Annual Trend of Top 5 Crimes Against Women (2013-2022)',
+            title='2. Annual Trend of Top 5 Crimes Against Women from 2013 to 2022)',
             markers=True,
             hover_data={'Year': True, 'Number of Crimes': ':,', 'Type of Crime': True}
         )
@@ -158,17 +153,15 @@ if not caw_dataset.empty and top_5_crimes_df is not None:
 
         st.plotly_chart(fig2, use_container_width=True)
 
-
-        # --- VIZ 3: Yearly Breakdown (Grouped Bar Chart) ---
-        st.subheader('3. Yearly Breakdown of Top 5 Crime Types (Grouped View)')
-
+        # 3rd visualisation
+        #st.subheader('3. Yearly Breakdown of Top 5 Crime Types (Grouped View)')
         fig3 = px.bar(
             plot_data_long,
             x='Year',
             y='Number of Crimes',
             color='Type of Crime',
             barmode='group',
-            title='Trend of Top 5 Crimes Against Women Over Time (2013-2022)',
+            title='3. Trend of Top 5 Crimes Against Women Over Time',
             labels={'Number of Crimes': 'Total Number of Crimes'},
             height=600
         )
@@ -182,14 +175,14 @@ if not caw_dataset.empty and top_5_crimes_df is not None:
 else:
     st.warning('The dataset is not loaded or is empty.')
 
-# --- 4. INTERPRETATION CONCLUSION ---
+# interpretation box
 if not caw_dataset.empty:
     st.markdown("---")
     st.markdown("""
-    <div class='interpretation-box' style='background-color: #e3f2fd; padding: 20px; border-radius: 12px; border-left: 6px solid #2196F3;'>
-        <h4>Interpretation & Conclusion for Objective 2</h4>
-        <p>The analysis clearly demonstrates the **dominance** of the Top 5 crime categories, which account for a significant portion of all cases reported. The initial horizontal bar chart (1) confirms that **Cruelty by Husband or his Relatives** is the most frequent crime by a wide margin.</p>
-        <p>The **Line (2) and Grouped Bar Charts (3)** show that while most Top 5 categories have fluctuated, the largest drivers of the overall trend are the two most frequent categories. Identifying these primary volume drivers is crucial for allocating resources and developing targeted prevention strategies.</p>
-    </div>
+    <div style='padding: 15px; border-radius: 10px; border-left: 5px solid #2196F3;'>
+    <h4>Interpretation</h4>
+    <p>All the graphs show that the crime of cruelty by husband or his relatives is the highest compared to the other four crimes.
+    This findings shows that domestic violence in India is at a serious level.</p>
+</div>
     """, unsafe_allow_html=True)
 # ----------------------------------------------------
