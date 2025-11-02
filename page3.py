@@ -211,7 +211,7 @@ if not caw_data_numeric.empty:
             zmin=-1,
             zmax=1,
             labels=dict(x="Crime Category", y="Crime Category", color="Correlation"),
-            title='3. Relationship of Each Crimes Against Women from 2013 to 2022)',
+            title='3. Relationship of Each Crimes Against Women from 2013 to 2022',
             height=700 
         )
         
