@@ -6,8 +6,7 @@ import plotly.express as px
 url = 'https://raw.githubusercontent.com/syazanaroslimi/IndAssSV/refs/heads/main/crime_against_women_2013_2022.csv'
 TOTAL_CRIMES_KEY = 'Total Crimes against Women'
 
-# --- 1. Data Loading and Preparation Functions ---
-
+# data preparation
 @st.cache_data
 def load_data(data_url):
     """Loads the dataset from the specified URL."""
@@ -25,12 +24,11 @@ def prepare_page2_data(caw_dataset):
     if caw_dataset.empty:
         return None, None, None, None
 
-    # 1. Clean DataFrames
+    # Clean DataFrames
     caw_data_numeric = caw_dataset.iloc[1:].copy()
     caw_data_numeric.columns = caw_dataset.iloc[0]
     
-    # Convert index (Year) to numeric
-    caw_data_numeric.index = pd.to_numeric(caw_data_numeric.index, errors='coerce').astype('Int64')
+    caw_data_numeric.index = pd.to_numeric(caw_data_numeric.index, errors='coerce').astype('Int64')     # convert index (year) to numeric
     
     # Isolate individual crime data
     individual_crimes_df = caw_data_numeric.drop(
@@ -38,27 +36,24 @@ def prepare_page2_data(caw_dataset):
         errors='ignore'
     ).astype(float)
     
-    # Isolate total crimes data
-    total_crimes_series = caw_data_numeric[TOTAL_CRIMES_KEY].astype(float)
+    total_crimes_series = caw_data_numeric[TOTAL_CRIMES_KEY].astype(float)    # isolate total crimes data
 
-    # 2. Identify Top 5 Crimes
+    # Identify Top 5 Crimes
     crime_totals = individual_crimes_df.sum()
     top_5_crime_names = crime_totals.nlargest(5).index.tolist()
     
-    # 3. Filter data for only the Top 5 crimes over time
-    top_5_crimes_over_time = individual_crimes_df[top_5_crime_names]
+    top_5_crimes_over_time = individual_crimes_df[top_5_crime_names]    # filter data for top 5 crimes over time
     
-    # 4. Melt the Top 5 data for Plotly Express (Long Format)
+    # Melt the Top 5 data for Plotly Express (Long Format)
     plot_data_long = top_5_crimes_over_time.reset_index().melt(
         id_vars='index',
         var_name='Type of Crime',
         value_name='Number of Crimes'
     ).rename(columns={'index': 'Year'})
 
-    # 5. Calculate Metrics
-    
-    # M1: Most Frequent Crime (The name) - Calculated but not used in metric boxes
-    most_frequent_crime = top_5_crime_names[0]
+    # Calculate Metrics
+    # M1: Most Frequent Crime (The name) 
+    # most_frequent_crime = top_5_crime_names[0]
     
     # M2: Total Top 5 Cases
     total_top_5_cases = top_5_crimes_over_time.sum().sum()
@@ -83,7 +78,7 @@ caw_dataset = load_data(url)
 
 (
     top_5_crimes_df, plot_data_long, 
-    most_frequent_crime, total_top_5_cases, 
+    total_top_5_cases, 
     contribution_percent, fastest_growing_crime, 
     fastest_growth_percent
 ) = prepare_page2_data(caw_dataset)
